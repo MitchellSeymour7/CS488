@@ -19,7 +19,7 @@ function render() {
   gl.clearColor(0, 0, 0, 1);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.enable(gl.DEPTH_TEST);
-  gl.enable(gl.CULL_FACE)
+  gl.enable(gl.CULL_FACE);
 
   shaderProgram.bind();
   shaderProgram.setUniformMatrix4('transform', transform);
@@ -138,3 +138,18 @@ async function initialize() {
 }
 
 initialize();
+/*
+static ortho(left, right, bottom, top, near, far)
+    {
+        let m = new Matrix4();
+        m.elements.fill(0);
+        m.elements[0] = 2 / (right-left);
+        m.elements[5] = 2 / (top-bottom);
+        m.elements[10] = 2 / (near-far);
+        m.elements[15] = 1;
+        m.elements[12] = -1 * ((right + left) / (right - left));
+        m.elements[13] = -1 * ((top + bottom) / (top - bottom));
+        m.elements[14] = ((near + far) / (near - far));
+        return m;
+    }
+*/

@@ -15,7 +15,7 @@ function render() {
   gl.viewport(0, 0, canvas.width, canvas.height);
   gl.clearColor(0, 0, 0, 1);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  
+  gl.enable(gl.CULL_FACE);
   
 
   shaderProgram.bind();
@@ -34,8 +34,9 @@ function onSizeChanged() {
 }
 
 async function initialize() {
-  transform = Matrix4.scale([2, 0.5, 1]);
-  transform = Matrix4.multiplyMatrix4(transform,Matrix4.rotateZ(45))
+  transform = Matrix4.identity();
+  //transform = Matrix4.scale([2, 0.5, 1]);
+  //transform = Matrix4.multiplyMatrix4(transform,Matrix4.rotateZ(45))
   console.log(transform.elements);
   //transform = Matrix4.translate([0.3, -0.5, 0.5]);
   //transform = Matrix4.rotateZ(45);
