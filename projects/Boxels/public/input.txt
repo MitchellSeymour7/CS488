@@ -1,0 +1,2 @@
+BOX-0-1.2-X    BOX-0-2.3-Y    BOX-0--4.5-Z      BOX-0-0.5   BOX-0-0.25   BOX-0-0.5
+BOX-1-0-X      BOX-1-0-Y      BOX-1-0-Z      BOX-1-1     BOX-1-1      BOX-1-1
