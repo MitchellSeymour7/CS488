@@ -38,7 +38,7 @@ export class Matrix4{
         return ret;
     }
 
-    static rotateX(rotateFactor){
+    static rotateY(rotateFactor){
         let ret = new Matrix4();
         ret.elements[0] = Math.cos(rotateFactor);
         ret.elements[2] = Math.sin(rotateFactor);
@@ -49,7 +49,7 @@ export class Matrix4{
         return ret;
     }
     
-    static rotateY(rotateFactor){
+    static rotateX(rotateFactor){
         let ret = new Matrix4();
         ret.elements[5] = Math.cos(rotateFactor);
         ret.elements[6] = Math.sin(rotateFactor);
@@ -131,6 +131,20 @@ export class Matrix4{
         ret = this.multiplyMatrix4(matrix1,matrix2);
         ret = this.multiplyMatrix4(ret,matrix3);
         return this.multiplyMatrix4(ret,matrix4);  
+    }
+
+    static ortho(left, right, bottom, top, near, far)
+    {
+        let m = new Matrix4();
+        m.elements.fill(0);
+        m.elements[0] = 2 / (right-left);
+        m.elements[5] = 2 / (top-bottom);
+        m.elements[10] = 2 / (near-far);
+        m.elements[15] = 1;
+        m.elements[12] = -1 * ((right + left) / (right - left));
+        m.elements[13] = -1 * ((top + bottom) / (top - bottom));
+        m.elements[14] = ((near + far) / (near - far));
+        return m;
     }
 
     toBuffer(){

@@ -9,7 +9,9 @@ console.log(window.gl);
 
 let vertexArray;
 let shaderProgram;
-let transform;
+let modelToWorld;
+let worldToClip;
+
 let prevClientX;
 let prevClientY;
 let timeRotation = 0;
@@ -22,7 +24,9 @@ function render() {
   gl.enable(gl.CULL_FACE);
 
   shaderProgram.bind();
-  shaderProgram.setUniformMatrix4('transform', transform);
+  shaderProgram.setUniformMatrix4('modelToWorld', modelToWorld);
+  shaderProgram.setUniformMatrix4('worldToClip', worldToClip);
+
   vertexArray.bind();
   vertexArray.drawIndexed(gl.TRIANGLE_STRIP);
   vertexArray.drawIndexed(gl.LINE_LOOP);
@@ -33,6 +37,21 @@ function render() {
 function onSizeChanged() {
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
+
+  const aspectRatio = canvas.width / canvas.height;
+  let right;
+  let top;
+
+  if (aspectRatio < 1) {
+    right = 3;
+    top = right / aspectRatio;
+  } else {
+    top = 3;
+    right = top * aspectRatio;
+  }
+
+  worldToClip = Matrix4.ortho(-right, right, -top, top, 10, -10);
+
   render();
 }
 
@@ -40,15 +59,15 @@ function cube() {
   vertexArray?.destroy();
 
   const positions = [
-    -0.5, -0.5,  0.5,
-     0.5, -0.5,  0.5,
-    -0.5,  0.5,  0.5,
-     0.5,  0.5,  0.5,
+    -1, -1,  1,
+     1, -1,  1,
+    -1,  1,  1,
+     1,  1,  1,
 
-    -0.5, -0.5, -0.5,
-     0.5, -0.5, -0.5,
-    -0.5,  0.5, -0.5,
-     0.5,  0.5, -0.5,
+    -1, -1, -1,
+     1, -1, -1,
+    -1,  1, -1,
+     1,  1, -1,
   ];
 
   const colors = [
@@ -79,7 +98,8 @@ function cube() {
 
 async function initialize() {
   const vertexSource = `
-  uniform mat4 transform;
+  uniform mat4 modelToWorld;
+  uniform mat4 worldToClip;
 
   in vec3 position;
   in vec3 color;
@@ -87,7 +107,7 @@ async function initialize() {
   out vec3 fcolor;
 
   void main() {
-    gl_Position = transform * vec4(position, 1.0);
+    gl_Position = worldToClip * modelToWorld * vec4(position, 1.0);
     gl_PointSize = 2.0; 
     fcolor = color;
   }
@@ -100,6 +120,7 @@ async function initialize() {
   
 
   void main() {
+    
     fragmentColor = vec4(fcolor, 1.0);
   }
   `;
@@ -107,7 +128,7 @@ async function initialize() {
   shaderProgram = new ShaderProgram(vertexSource, fragmentSource);
   cube();
 
-  transform = Matrix4.identity();
+  modelToWorld = Matrix4.identity();
 
   window.addEventListener('resize', onSizeChanged);
   window.addEventListener('mousemove', event => {
@@ -117,7 +138,7 @@ async function initialize() {
     }
     let rotationX = (event.clientX-prevClientX)/800;
     let rotationY = (event.clientY-prevClientY)/800;
-    transform = Matrix4.rotateXYZ(transform,rotationX,rotationY,0);
+    modelToWorld = Matrix4.rotateXYZ(modelToWorld,rotationX,rotationY,0);
     prevClientX = event.clientX;  
     prevClientY = event.clientY;
     
@@ -130,7 +151,7 @@ async function initialize() {
     let y = (Math.sin(timeRotation+2))/100;
     let z = ((Math.sin(timeRotation+1))-0.3)/100;
     console.log(prevClientX);
-    transform = Matrix4.rotateXYZ(transform,x,y,z);
+    modelToWorld = Matrix4.rotateXYZ(modelToWorld,x,y,z);
     render();
   }, 15);
   
@@ -138,18 +159,3 @@ async function initialize() {
 }
 
 initialize();
-/*
-static ortho(left, right, bottom, top, near, far)
-    {
-        let m = new Matrix4();
-        m.elements.fill(0);
-        m.elements[0] = 2 / (right-left);
-        m.elements[5] = 2 / (top-bottom);
-        m.elements[10] = 2 / (near-far);
-        m.elements[15] = 1;
-        m.elements[12] = -1 * ((right + left) / (right - left));
-        m.elements[13] = -1 * ((top + bottom) / (top - bottom));
-        m.elements[14] = ((near + far) / (near - far));
-        return m;
-    }
-*/

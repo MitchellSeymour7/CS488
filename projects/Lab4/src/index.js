@@ -18,7 +18,7 @@ let timeRotation = 0;
 
 function render() {
   gl.viewport(0, 0, canvas.width, canvas.height);
-  gl.clearColor(1, 1, 1, 1);
+  gl.clearColor(0, 0, 0, 1);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.enable(gl.DEPTH_TEST);
   gl.enable(gl.CULL_FACE);
@@ -94,7 +94,8 @@ function cube() {
      1, -1,  1,
     -1, -1, -1,
      1, -1, -1,
- ];    const colors = [
+  ];    
+  let colors = [
     1, 0, 0,
     1, 0, 0,
     1, 0, 0,
@@ -124,8 +125,8 @@ function cube() {
     0, 1, 1,
     0, 1, 1,
     0, 1, 1,
- ];    
- const faces = [
+  ];    
+  const faces = [
     // front
     0, 1, 2,
     1, 3, 2,
@@ -149,8 +150,8 @@ function cube() {
     // bottom
     20, 22, 21,
     21, 22, 23,
- ];
- const normals = [
+  ];
+  const normals = [
     
     // front
     0,0,1,
@@ -187,7 +188,8 @@ function cube() {
     0,-1,0,
     0,-1,0,
     0,-1,0,
- ];
+  ];
+  colors = positions;
   const attributes = new VertexAttributes();
   attributes.addAttribute('position', positions.length/3, 3, positions);
   attributes.addAttribute('color', positions.length/3, 3, colors);
@@ -259,7 +261,7 @@ async function initialize() {
   `;
 
   const fragmentSource = `
-  const vec3 light_direction = normalize(vec3(.1,.1,-1));
+  const vec3 light_direction = normalize(vec3(.2,.7,.8));
   const vec3 albedo = vec3(0.0, 1.0, 1.0);
 
   in vec3 fnormal;
@@ -270,14 +272,14 @@ async function initialize() {
   void main() {
     vec3 normal = normalize(fnormal);
     float litness = max(0.0, dot(normal, light_direction));
+    fragmentColor = vec4((fcolor+litness)/2.0, 1.0);
     //fragmentColor = vec4(fcolor*litness, 1.0);
-    fragmentColor = vec4(fcolor, 1.0);
   }
   `;
 
   shaderProgram = new ShaderProgram(vertexSource, fragmentSource);
-  sphere();
-  //cube();
+  //sphere();
+  cube();
 
   modelToWorld = Matrix4.scale([1.5,1.5,1.5]);
   window.addEventListener('resize', onSizeChanged);
@@ -315,15 +317,15 @@ async function initialize() {
     
     render();
   });
-  // setInterval(() => {
-  //   timeRotation += 0.01;
-  //   timeRotation = timeRotation;
-  //   let x = (Math.sin(timeRotation))/100+.01;
-  //   let y = (Math.sin(timeRotation+2))/100;
-  //   let z = ((Math.sin(timeRotation+1))-0.3)/100;
-  //   modelToWorld = Matrix4.rotateXYZ(modelToWorld,x,y,z);
-  //   render();
-  // }, 15);
+  setInterval(() => {
+    timeRotation += 0.01;
+    timeRotation = timeRotation;
+    let x = (Math.sin(timeRotation))/100+.01;
+    let y = (Math.sin(timeRotation+2))/100;
+    let z = ((Math.sin(timeRotation+1))-0.3)/100;
+    modelToWorld = Matrix4.rotateXYZ(modelToWorld,x,y,z);
+    render();
+  }, 15);
   
   onSizeChanged();
 }

@@ -1,2 +1,14 @@
-BOX-0-1.2-X    BOX-0-2.3-Y    BOX-0--4.5-Z      BOX-0-0.5   BOX-0-0.25   BOX-0-0.5
-BOX-1-0-X      BOX-1-0-Y      BOX-1-0-Z      BOX-1-1     BOX-1-1      BOX-1-1
+BOX-0-0-X      BOX-0-0-Y      BOX-0-0-Z      BOX-0-3     BOX-0-4      BOX-0-1     BOX-0-0.2-R   BOX-0-0.5-G   BOX-0-0.9-B
+BOX-1-0-X      BOX-1--2-Y     BOX-1-0-Z      BOX-1-5     BOX-1-2      BOX-1-1     BOX-1-0.2-R   BOX-1-0.5-G   BOX-1-0.9-B
+BOX-2-4-X      BOX-2-4-Y      BOX-2-0-Z      BOX-2-1     BOX-2-2      BOX-2-1     BOX-2-0.2-R   BOX-2-0.5-G   BOX-2-0.9-B
+BOX-3--4-X     BOX-3-4-Y      BOX-3-0-Z      BOX-3-1     BOX-3-2      BOX-3-1     BOX-3-0.2-R   BOX-3-0.5-G   BOX-3-0.9-B
+BOX-4-6-X      BOX-4-7-Y      BOX-4-0-Z      BOX-4-1     BOX-4-1      BOX-4-1     BOX-4-0.2-R   BOX-4-0.5-G   BOX-4-0.9-B
+BOX-5--6-X     BOX-5-7-Y      BOX-5-0-Z      BOX-5-1     BOX-5-1      BOX-5-1     BOX-5-0.2-R   BOX-5-0.5-G   BOX-5-0.9-B
+BOX-6-6-X      BOX-6--1-Y     BOX-6-0-Z      BOX-6-1     BOX-6-5      BOX-6-1     BOX-6-0.2-R   BOX-6-0.5-G   BOX-6-0.9-B
+BOX-7--6-X     BOX-7--1-Y     BOX-7-0-Z      BOX-7-1     BOX-7-5      BOX-7-1     BOX-7-0.2-R   BOX-7-0.5-G   BOX-7-0.9-B
+BOX-8-3-X      BOX-8--7-Y     BOX-8-0-Z      BOX-8-2     BOX-8-1      BOX-8-1     BOX-8-0.2-R   BOX-8-0.5-G   BOX-8-0.9-B
+BOX-9--3-X     BOX-9--7-Y     BOX-9-0-Z      BOX-9-2     BOX-9-1      BOX-9-1     BOX-9-0.2-R   BOX-9-0.5-G   BOX-9-0.9-B
+BOX-10-8-X     BOX-10-0-Y     BOX-10-0-Z     BOX-10-1    BOX-10-2     BOX-10-1    BOX-10-0.2-R  BOX-10-0.5-G  BOX-10-0.9-B
+BOX-11--8-X    BOX-11-0-Y     BOX-11-0-Z     BOX-11-1    BOX-11-2     BOX-11-1    BOX-11-0.2-R  BOX-11-0.5-G  BOX-11-0.9-B
+BOX-12-10-X    BOX-12--3-Y    BOX-12-0-Z     BOX-12-1    BOX-12-3     BOX-12-1    BOX-12-0.2-R  BOX-12-0.5-G  BOX-12-0.9-B
+BOX-13--10-X   BOX-13--3-Y    BOX-13-0-Z     BOX-13-1    BOX-13-3     BOX-13-1    BOX-13-0.2-R  BOX-13-0.5-G  BOX-13-0.9-B
