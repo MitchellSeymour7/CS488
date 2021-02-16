@@ -120,15 +120,15 @@ function cube() {
   for (var i = 0; i < arr.length; i++)
   {
     //reads color if specified
-    let r = 1;
-    let g = 1;
-    let b = 1;
+    let redValue = 1;
+    let greenValue = 1;
+    let blueValue = 1;
     if (arr[i].indexOf("-R") != -1) {
-      b = arr[i].substring(arr[i].lastIndexOf("BOX-"+i+"-")+("BOX-"+i+"-").length,arr[i].lastIndexOf("-B"));
+      blueValue = arr[i].substring(arr[i].lastIndexOf("BOX-"+i+"-")+("BOX-"+i+"-").length,arr[i].lastIndexOf("-B"));
       arr[i] = arr[i].substring(0, arr[i].lastIndexOf("BO"));
-      g = arr[i].substring(arr[i].lastIndexOf("BOX-"+i+"-")+("BOX-"+i+"-").length,arr[i].lastIndexOf("-G"));
+      greenValue = arr[i].substring(arr[i].lastIndexOf("BOX-"+i+"-")+("BOX-"+i+"-").length,arr[i].lastIndexOf("-G"));
       arr[i] = arr[i].substring(0, arr[i].lastIndexOf("B"));
-      r = arr[i].substring(arr[i].lastIndexOf("BOX-"+i+"-")+("BOX-"+i+"-").length,arr[i].lastIndexOf("-R"));
+      redValue = arr[i].substring(arr[i].lastIndexOf("BOX-"+i+"-")+("BOX-"+i+"-").length,arr[i].lastIndexOf("-R"));
       arr[i] = arr[i].substring(0, arr[i].lastIndexOf("B"));
     }
 
@@ -175,25 +175,18 @@ function cube() {
     for (var j = colors.length-colorsTemplate.length; j < colors.length; j++)
     {
       if(j%3 == 0) {
-        colors[j] = colors[j]*r;
+        colors[j] = colors[j]*redValue;
       }
       if(j%3 == 1) {
-        colors[j] = colors[j]*g;
+        colors[j] = colors[j]*greenValue;
       }
       if(j%3 == 2) {
-        colors[j] = colors[j]*b;
+        colors[j] = colors[j]*blueValue;
       }
     }
 
     //sets normals
     normals = normals.concat(normalsTemplate);
-
-    console.log(r);
-    console.log(g);
-    console.log(b);
-    console.log("asdf");
-    console.log(depth);
-    console.log(positions);
   }
 
   const attributes = new VertexAttributes();
@@ -243,7 +236,6 @@ async function initialize() {
   `;  
 
   file = await fetch("input.txt").then(response => response.text());
-  console.log(file);
 
   shaderProgram = new ShaderProgram(vertexSource, fragmentSource);
   cube();
