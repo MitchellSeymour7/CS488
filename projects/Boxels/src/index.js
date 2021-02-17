@@ -15,7 +15,8 @@ let worldToClip;
 let prevClientX;
 let prevClientY;
 
-let file;
+let inputFile;
+let modelFile;
 
 function render() {
   gl.viewport(0, 0, canvas.width, canvas.height);
@@ -56,7 +57,7 @@ function onSizeChanged() {
   render();
 }
 
-function cube() {
+function displayInputFile() {
   vertexArray?.destroy();
 
   const positionsTemplate = [   
@@ -116,7 +117,7 @@ function cube() {
   let normals = [];
 
   // loop for all cubes
-  var arr = file.split("\n");
+  var arr = inputFile.split("\n");
   for (var i = 0; i < arr.length; i++)
   {
     //reads color if specified
@@ -197,6 +198,117 @@ function cube() {
   vertexArray = new VertexArray(shaderProgram, attributes);
 }
 
+function display3Dmodels() {
+  vertexArray?.destroy();
+
+  const positionsTemplate = [   
+    //front face
+    -1, -1,  1,  1, -1,  1, -1,  1,  1,  1,  1,  1,
+    //back face
+    -1, -1, -1,  1, -1, -1, -1,  1, -1,  1,  1, -1,
+    //left face
+    -1, -1,  1, -1, -1, -1, -1,  1,  1, -1,  1, -1,
+    // right face
+     1, -1,  1,  1, -1, -1,  1,  1,  1,  1,  1, -1,
+    // top face
+    -1,  1,  1,  1,  1,  1, -1,  1, -1,  1,  1, -1,
+    // bottom face
+    -1, -1,  1,  1, -1,  1, -1, -1, -1,  1, -1, -1,
+  ];    
+  const colorsTemplate = [
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  ];
+  const indicesTemplate = [
+    // front
+     0,  1,  2,  1,  3,  2,
+    // back
+     4,  6,  5,  5,  6,  7,
+    // left
+     8, 10,  9,  9, 10, 11,
+    // right
+    12, 13, 14, 13, 15, 14,
+    // top
+    16, 17, 18, 17, 19, 18,
+    // bottom
+    20, 22, 21, 21, 22, 23,
+  ];
+  const normalsTemplate = [
+    // front
+     0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+    // back
+     0, 0,-1, 0, 0,-1, 0, 0,-1, 0, 0,-1,
+    // left
+    -1, 0, 0,-1, 0, 0,-1, 0, 0,-1, 0, 0,
+    // right
+     1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
+    // top
+     0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0,
+    // bottom
+     0,-1, 0, 0,-1, 0, 0,-1, 0, 0,-1, 0,
+  ];
+
+  let positions = [];
+  let indices = [];
+  let colors = [];
+  let normals = [];
+
+  // loop for all cubes
+  var arr = modelFile.split("\n");
+  for (var i = 0; i < arr.length/5; i++)
+  {
+    if(i%100 == 0) {
+      console.log(i);
+    }
+    //reads center
+    
+    let xCenter = arr[i].substring(0,arr[i].indexOf(","));
+    arr[i] = arr[i].substring(arr[i].indexOf(" ")+1);
+    let yCenter = arr[i].substring(0,arr[i].indexOf(","));
+    arr[i] = arr[i].substring(arr[i].indexOf(" ")+1);
+    //let zCenter = arr[i].substring(0,arr[i].indexOf(","));
+    let zCenter = arr[i];
+    //sets positions
+    positions = positions.concat(positionsTemplate);
+    for (var j = positions.length-positionsTemplate.length; j < positions.length; j++)
+    {
+      if(j%3 == 0) {
+        positions[j] = positions[j]+parseFloat(xCenter) -80.0;
+      }
+      if(j%3 == 1) {
+        positions[j] = positions[j]+parseFloat(yCenter) -145.0;
+      }
+      if(j%3 == 2) {
+        positions[j] = positions[j]+parseFloat(zCenter);
+      }
+    }
+
+    //sets indices
+    indices = indices.concat(indicesTemplate);
+    for (var j = indices.length-indicesTemplate.length; j < indices.length; j++)
+    {
+      indices[j] += i*24;
+    }
+
+    //sets colors
+    colors = colors.concat(colorsTemplate);
+
+    //sets normals
+    normals = normals.concat(normalsTemplate);
+  }
+
+  const attributes = new VertexAttributes();
+  attributes.addAttribute('position', positions.length/3, 3, positions);
+  attributes.addAttribute('color', positions.length/3, 3, colors);
+  attributes.addAttribute('normal', normals.length/3, 3, normals);
+  attributes.addIndices(indices);
+  vertexArray = new VertexArray(shaderProgram, attributes);
+}
+
 async function initialize() {
   const vertexSource = `
   uniform mat4 modelToWorld;
@@ -235,12 +347,15 @@ async function initialize() {
   }
   `;  
 
-  file = await fetch("input.txt").then(response => response.text());
+  inputFile = await fetch("input.txt").then(response => response.text());
+  modelFile = await fetch("venus de milo.txt").then(response => response.text());
 
   shaderProgram = new ShaderProgram(vertexSource, fragmentSource);
-  cube();
+  //display3Dmodels();
+  displayInputFile();
 
-  modelToWorld = Matrix4.scale([.1,.1,.1]);
+  //modelToWorld = Matrix4.scale([.015,.015,.015]);
+  modelToWorld = Matrix4.scale([.05,.05,.05]);
   window.addEventListener('resize', onSizeChanged);
   window.addEventListener('keydown', event => {
     let rotationAmount = 0.1;
@@ -283,8 +398,6 @@ async function initialize() {
 initialize();
 
 /*
-BOX-0-1.2-X    BOX-0-2.3-Y    BOX-0--4.5-Z      BOX-0-0.5   BOX-0-0.25   BOX-0-0.5  BOX-0-0.2-R  BOX-0-0.5-G  BOX-0-0.9-B
-BOX-1-0-X      BOX-1-0-Y      BOX-1-0-Z         BOX-1-1     BOX-1-1      BOX-1-1
 //space invaders
 BOX-0-0-X      BOX-0-0-Y      BOX-0-0-Z      BOX-0-3     BOX-0-4      BOX-0-1     BOX-0-0.2-R   BOX-0-0.5-G   BOX-0-0.9-B
 BOX-1-0-X      BOX-1--2-Y     BOX-1-0-Z      BOX-1-5     BOX-1-2      BOX-1-1     BOX-1-0.2-R   BOX-1-0.5-G   BOX-1-0.9-B
