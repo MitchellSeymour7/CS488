@@ -259,28 +259,27 @@ function display3Dmodels() {
 
   // loop for all cubes
   var arr = modelFile.split("\n");
-  for (var i = 0; i < arr.length/5; i++)
+  for (var i = 0; i < arr.length; i++)
   {
-    if(i%100 == 0) {
+    if(i%50000 == 0) {
       console.log(i);
     }
     //reads center
-    
     let xCenter = arr[i].substring(0,arr[i].indexOf(","));
     arr[i] = arr[i].substring(arr[i].indexOf(" ")+1);
     let yCenter = arr[i].substring(0,arr[i].indexOf(","));
     arr[i] = arr[i].substring(arr[i].indexOf(" ")+1);
-    //let zCenter = arr[i].substring(0,arr[i].indexOf(","));
     let zCenter = arr[i];
+
     //sets positions
-    positions = positions.concat(positionsTemplate);
+    positions.push.apply(positions, positionsTemplate);
     for (var j = positions.length-positionsTemplate.length; j < positions.length; j++)
     {
       if(j%3 == 0) {
-        positions[j] = positions[j]+parseFloat(xCenter) -80.0;
+        positions[j] = positions[j]+parseFloat(xCenter) -330.0;
       }
       if(j%3 == 1) {
-        positions[j] = positions[j]+parseFloat(yCenter) -145.0;
+        positions[j] = positions[j]+parseFloat(yCenter) -500.0;
       }
       if(j%3 == 2) {
         positions[j] = positions[j]+parseFloat(zCenter);
@@ -288,17 +287,16 @@ function display3Dmodels() {
     }
 
     //sets indices
-    indices = indices.concat(indicesTemplate);
+    indices.push.apply(indices, indicesTemplate);
     for (var j = indices.length-indicesTemplate.length; j < indices.length; j++)
     {
       indices[j] += i*24;
     }
 
     //sets colors
-    colors = colors.concat(colorsTemplate);
-
+    colors.push.apply(colors, colorsTemplate);
     //sets normals
-    normals = normals.concat(normalsTemplate);
+    normals.push.apply(normals, normalsTemplate);
   }
 
   const attributes = new VertexAttributes();
@@ -348,14 +346,14 @@ async function initialize() {
   `;  
 
   inputFile = await fetch("input.txt").then(response => response.text());
-  modelFile = await fetch("venus de milo.txt").then(response => response.text());
+  modelFile = await fetch("winged victory HQ.txt").then(response => response.text());
 
   shaderProgram = new ShaderProgram(vertexSource, fragmentSource);
-  //display3Dmodels();
-  displayInputFile();
+  display3Dmodels();
+  //displayInputFile();
 
-  //modelToWorld = Matrix4.scale([.015,.015,.015]);
-  modelToWorld = Matrix4.scale([.05,.05,.05]);
+  modelToWorld = Matrix4.scale([.005,.005,.005]);
+  //modelToWorld = Matrix4.scale([.05,.05,.05]);
   window.addEventListener('resize', onSizeChanged);
   window.addEventListener('keydown', event => {
     let rotationAmount = 0.1;
