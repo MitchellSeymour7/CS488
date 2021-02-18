@@ -198,10 +198,10 @@ function cube() {
   vertexArray = new VertexArray(shaderProgram, attributes);
 }
 
-function sphere() {
+function sphere(rev, lev) {
   vertexArray?.destroy();
-  const revolutions = 10;
-  const levels = 10;
+  const revolutions = rev;
+  const levels = lev;
   let positions = [];
   let indices = [];
   for(let i = 0; i < levels; i++) {
@@ -278,8 +278,8 @@ async function initialize() {
   `;
 
   shaderProgram = new ShaderProgram(vertexSource, fragmentSource);
-  //sphere();
-  cube();
+  sphere(80,90);
+  //cube();
 
   modelToWorld = Matrix4.scale([1.5,1.5,1.5]);
   window.addEventListener('resize', onSizeChanged);
