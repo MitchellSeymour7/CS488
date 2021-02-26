@@ -381,9 +381,9 @@ async function initialize() {
       prevClientX = event.clientX;
       prevClientY = event.clientY;
     }
-    let rotationX = (event.clientX-prevClientX)/800;
+    let rotationX = (prevClientX-event.clientX)/800;
     let rotationY = (event.clientY-prevClientY)/800;
-    modelToWorld = Matrix4.rotateXYZ(modelToWorld,rotationX,rotationY,0);
+    modelToWorld = Matrix4.rotateXYZ(modelToWorld,rotationY,rotationX,0);
     prevClientX = event.clientX;  
     prevClientY = event.clientY;
     

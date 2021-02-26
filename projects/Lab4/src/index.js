@@ -276,10 +276,10 @@ async function initialize() {
     //fragmentColor = vec4(fcolor*litness, 1.0);
   }
   `;
-
+  
   shaderProgram = new ShaderProgram(vertexSource, fragmentSource);
   sphere(80,90);
-  //cube();
+  cube();
 
   modelToWorld = Matrix4.scale([1.5,1.5,1.5]);
   window.addEventListener('resize', onSizeChanged);
