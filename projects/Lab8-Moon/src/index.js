@@ -33,9 +33,6 @@ function render() {
   shaderProgram.setUniformMatrix4('worldFromModel', transform);
   shaderProgram.setUniformMatrix4('clipFromEye', clipFromEye);
   shaderProgram.setUniformMatrix4('eyeFromWorld', camera.matrix);
-
-  // array.entries() -> [[0, value0], [1, value1], [2, value2]]
-  // for (let [i, object] of array.entries()) {}
   
   for (let [i, object] of vertexObjects.entries()) {
     shaderProgram.setUniformMatrix4('objPosition', object.matrix ? object.matrix : Matrix4.identity());
@@ -45,8 +42,6 @@ function render() {
     object.vertex.unbind();
   }
   shaderProgram.unbind();
-
-
 }
 
 function onSizeChanged() {
@@ -129,7 +124,6 @@ function generateSphere(nlatitudes, nlongitudes, outerRadius) {
     }
   }
   return {positions, normals, indices,textureCoords};
-  //return generateTorus(nlatitudes, nlongitudes, outerRadius, -outerRadius);
 }
 
 function generateTorus (nlatitudes, nlongitudes, outerRadius, innerRadius) {
@@ -222,28 +216,7 @@ async function initialize() {
   camera = new Camera(new Vector3(15,2,0),new Vector3(0,0,0),new Vector3(0,1,0));
 
   await loadTexture("tileable_grass_00.png", gl.TEXTURE0);
-  await loadTexture("lroc_color_poles_1k.jpg", gl.TEXTURE1);
-
-  /*
-  //const {positions, normals, indices} = generateTorus(50, 50, 9, 3);
-  const {positions, normals, indices} = generateSphere(50, 50, 9);
-
-  const texture = loadTexture('lroc_color_poles_1k.jpg');
-  console.log(texture);
-  const attributes = new VertexAttributes();
-  attributes.addAttribute('normal', normals / 3, 3, normals);
-  attributes.addAttribute('position', positions / 3, 3, positions);
-  
-  const texcoords = [
-    0, 0,
-    1, 0,
-    0, 1,
-    1, 1,
-  ];
-  attributes.addAttribute('texcoords', texcoords/2, 2, texcoords);
-  attributes.addIndices(indices);
-  */
-  
+  await loadTexture("lroc_color_poles_1k.jpg", gl.TEXTURE1);  
 
   const vertexSource = `
   uniform mat4 worldFromModel ;
@@ -291,9 +264,6 @@ async function initialize() {
   addObject(generateRectangle(3,3),Matrix4.rotateX(90).multiplyMatrix4(Matrix4.translate(1,1,1)))
 
   addObject(generateSphere(20,20,2),Matrix4.translate(1,1,1), new Vector3(0.1,0.2,0.3))
-
-  //pair the shader program and the vertex data/attributes
-  //vertexArray = new VertexArray(shaderProgram, attributes);
   
   window.addEventListener('resize', onSizeChanged);
   onSizeChanged();
@@ -363,8 +333,6 @@ function addObject(objectToAdd, transform=Matrix4.identity(), color=new Vector3(
 
   let vertexArray = new VertexArray(shaderProgram, attributes);
   vertexObjects.push({vertex: vertexArray, matrix: Matrix4.identity()});
-
-  
 }
 
 initialize();
