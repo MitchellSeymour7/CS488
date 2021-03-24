@@ -6,7 +6,6 @@ export class Vector3 {
         this._x = x;
         this._y = y;
         this._z = z;
-        this._magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
     }
 
     get x() {
@@ -34,16 +33,13 @@ export class Vector3 {
     }
 
     get magnitude() {
-        return this._magnitude;
-    }
-
-    set magnitude(newMagnitude) {
-        this._magnitude = newMagnitude;
+        return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
     }
 
     normalize() 
     {
-        const result = new Vector3(this.x / this.magnitude, this.y / this.magnitude, this.z / this.magnitude);
+        let magnitude = Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
+        const result = new Vector3(this.x / magnitude, this.y / magnitude, this.z / magnitude);
         return result;
     }
 
@@ -60,6 +56,26 @@ export class Vector3 {
     dot(otherVector) 
     {
         const result = this.x * otherVector.x + this.y * otherVector.y + this.z * otherVector.z;
+        return result;
+    }
+
+    add(otherVector)
+    {
+        const newX = (this.x + otherVector.x);
+        const newY = (this.y + otherVector.y);
+        const newZ = (this.z + otherVector.z);
+
+        const result = new Vector3(newX, newY, newZ);
+        return result;
+    }
+
+    scalarMultiply(value)
+    {
+        const newX = (this.x * value);
+        const newY = (this.y * value);
+        const newZ = (this.z * value);
+
+        const result = new Vector3(newX, newY, newZ);
         return result;
     }
 

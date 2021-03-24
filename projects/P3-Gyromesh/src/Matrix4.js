@@ -1,3 +1,5 @@
+import { Vector4 } from "./Vector4";
+
 export class Matrix4 {
     constructor()
     {
@@ -100,7 +102,35 @@ export class Matrix4 {
         return m;
     }
 
-    multiplyVector4(vector) 
+    set(r, c, value) {
+        this.elements[c * 4 + r] = value;
+        return this;
+    }
+
+    static fovPerspective(fovY, aspect, near, far) {
+        let y = near * Math.tan(fovY * 0.5 * Math.PI / 180);
+        let x = y * aspect;
+        return this.frustumPerspective(-x, x, -y, y, near, far);
+    }
+    
+    static frustumPerspective(left, right, bottom, top, near, far) {
+        let m = new Matrix4();
+    
+        m.set(0, 0, 2 * near / (right - left));
+        m.set(1, 1, 2 * near / (top - bottom));
+        m.set(2, 2, (near + far) / (near - far));
+    
+        m.set(0, 2, (right + left) / (right - left));
+        m.set(1, 2, (top + bottom) / (top - bottom));
+        m.set(2, 3, 2 * far * near / (near - far));
+    
+        m.set(3, 2, -1);
+        m.set(3, 3, 0);
+    
+        return m;
+    }
+
+    multiplyVector4Array(vector) 
     {
         //0 4 8 12
         //1 5 9 13
@@ -124,8 +154,35 @@ export class Matrix4 {
                 } 
             }
         }
-        
         return result;
+    }
+
+    multiplyVector4(vector) 
+    {
+        //0 4 8 12
+        //1 5 9 13
+        //2 6 10 14
+        //3 7 11 15
+        let input = [vector.x,vector.y,vector.z,vector.w];
+        let result = [];
+        let currDotProduct = 0;
+        let vecIndexCounter = 0;
+        for(let r = 0; r < 4; r++)
+        {
+            for(let c = 0; c < 4; c++)
+            {
+                let matrixVal = this.elements[r + (4*c)];
+                currDotProduct += matrixVal * input[vecIndexCounter];
+                vecIndexCounter++;
+                if(vecIndexCounter == 4)
+                {
+                    vecIndexCounter = 0;
+                    result.push(currDotProduct);
+                    currDotProduct = 0;
+                } 
+            }
+        }
+        return new Vector4(result[0],result[1],result[2],result[3]);
     }
 
     multiplyMatrix4(otherMatrix)

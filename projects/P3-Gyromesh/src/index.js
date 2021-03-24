@@ -5,15 +5,18 @@ import {Matrix4} from './Matrix4';
 import {Vector2} from './Vector2';
 import {Trackball} from './Trackball';
 import { Vector3 } from './Vector3';
+import {Camera} from './camera';
+
 
 const canvas = document.getElementById('canvas');
 window.gl = canvas.getContext('webgl2');
 
 let shaderProgram;
 let vertexArray;
-let worldToClip;
+let clipFromEye;
 let isLeftMouseDown = false;
 let trackball;
+let camera;
 let modelDimensions = new Vector3(0,0,0);
 
 function render() {
@@ -21,12 +24,13 @@ function render() {
   gl.clearColor(0, 0, 0, 1);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.enable(gl.DEPTH_TEST);
-  gl.enable(gl.CULL_FACE);
+  //gl.enable(gl.CULL_FACE);
 
   shaderProgram.bind();
-  //shaderProgram.setUniformMatrix4('modelToWorld', trackball.rotation);
-  shaderProgram.setUniformMatrix4('trackball', trackball.rotation);
-  shaderProgram.setUniformMatrix4('worldToClip', worldToClip);
+  shaderProgram.setUniformMatrix4('worldFromModel', trackball.rotation);
+  shaderProgram.setUniformMatrix4('clipFromEye', clipFromEye);
+  shaderProgram.setUniformMatrix4('eyeFromWorld', camera.matrix);
+
   vertexArray.bind();
   vertexArray.drawIndexed(gl.TRIANGLES);
   //vertexArray.drawIndexed(gl.LINE_LOOP);
@@ -51,7 +55,8 @@ function onSizeChanged() {
     right = top * aspectRatio;
   }
 
-  worldToClip = Matrix4.ortho(-right, right, -top, top, -100, 100);
+  clipFromEye = Matrix4.ortho(-right, right, -top, top, -1000, 1000);
+  clipFromEye = Matrix4.fovPerspective(45, aspectRatio, 0.01, 1000);
 
   trackball.setViewport(canvas.width, canvas.height);
   
@@ -112,42 +117,32 @@ function generateObj (inputFile) {
 
 async function initialize() {
   const vertexSource = `
-  uniform mat4 trackball;
-  uniform mat4 worldToClip;
+  uniform mat4 worldFromModel;
+  uniform mat4 clipFromEye;
+  uniform mat4 eyeFromWorld;
   in vec3 position;
   in vec3 normal;
 
   out vec3 fnormal;
+  out vec3 positionEye;
   
   void main() {
-    gl_Position = worldToClip * trackball * vec4(position, 1.0);
+    positionEye = (eyeFromWorld * worldFromModel * vec4(position, 1.0)).xyz;
+    gl_Position = clipFromEye * vec4(positionEye, 1.0);
 
-    fnormal = (trackball * vec4(normal, 0)).xyz;
+    fnormal = (eyeFromWorld * worldFromModel * vec4(normal, 0)).xyz;
   }
   `;
-  
-  // const fragmentSource = `
-  // in vec3 fnormal;
-  // out vec4 fragmentColor;
-  // const vec3 light_direction = normalize(vec3(1.0, 1.0, 1.0));
-  // void main() {
-  //   vec3 normal = normalize(fnormal);
-  //   float litness = max(0.0, dot(normal, light_direction));
-  //   fragmentColor = vec4(vec3(litness), 1.0);
-  // }
-  // `;
-
 
   const fragmentSource = `
-  const vec3 lightPosition = vec3(1.0);
-  const vec3 lightColor = vec3(1.0);
   const float ambientWeight = 0.1;
-  const float shininess = 90.0;
+  const vec3 lightPosition = vec3(30.0,100.0,0.0);
+  const vec3 lightColor = vec3(1.0);
+  const float shininess = 60.0;
 
-  const vec3 positionEye = vec3(1.0,0,0);
-
-
+  in vec3 positionEye;
   in vec3 fnormal;
+
   out vec4 fragmentColor;
   
   void main() {
@@ -164,17 +159,21 @@ async function initialize() {
     // Specular
     vec3 reflectedLightVector = 2.0 * dot(normal, lightVector) * normal - lightVector;
     vec3 eyeVector = -normalize(positionEye);
-    float specularity = max(0.0, dot(reflectedLightVector, eyeVector));
+
+    vec3 halfVector = normalize(lightVector + eyeVector);
+    float specularity = max(0.0, dot(halfVector, normal));
 
     vec3 specular = vec3(1.0) * pow(specularity, shininess);
 
     vec3 rgb = ambient + diffuse + specular;
+    rgb = ambient + diffuse + specular;
     fragmentColor = vec4(rgb, 1.0);
   }
   `;
   
-
   trackball = new Trackball();
+  camera = new Camera(new Vector3(0,3,35),new Vector3(0,0,3),new Vector3(0,1,0))
+
 
   let inputFile = await fetch("winged-victory-of-samothrace-at-the-louvre-paris-1.obj").then(response => response.text());
   //let inputFile = await fetch("hungarian-parliament-1.obj").then(response => response.text());
@@ -238,3 +237,30 @@ function onMouseUp(event) {
   }
 }
 
+window.addEventListener('keydown', event => {
+  if (event.key === 'a') {
+    camera.strafe(-0.1);
+    render();
+  } else if (event.key === 'd') {
+    camera.strafe(0.1);
+    //console.log(camera);
+    render();
+  } else if (event.key === 'w') {
+    camera.advance(0.1);
+    render();
+  } else if (event.key === 's') {
+    camera.advance(-0.1);
+    render();
+  } else if (event.key === 'e') {
+    document.body.requestPointerLock();
+  }
+  render();
+});
+
+window.addEventListener('mousemove', event => {
+  if (document.pointerLockElement) {
+    camera.yaw(-event.movementX * 0.01);
+    camera.pitch(-event.movementY * 0.01);
+    render();
+  }
+});
