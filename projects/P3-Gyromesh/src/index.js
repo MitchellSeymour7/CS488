@@ -136,9 +136,9 @@ async function initialize() {
 
   const fragmentSource = `
   const float ambientWeight = 0.1;
-  const vec3 lightPosition = vec3(30.0,100.0,0.0);
-  const vec3 lightColor = vec3(1.0);
-  const float shininess = 60.0;
+  const vec3 lightPosition = vec3(10.0,20.0,0.0);
+  const vec3 lightColor = vec3(.75);
+  const float shininess = 10.0;
 
   in vec3 positionEye;
   in vec3 fnormal;
@@ -166,7 +166,7 @@ async function initialize() {
     vec3 specular = vec3(1.0) * pow(specularity, shininess);
 
     vec3 rgb = ambient + diffuse + specular;
-    rgb = ambient + diffuse + specular;
+    rgb = ambient/10.0 + diffuse/10.0 + specular;
     fragmentColor = vec4(rgb, 1.0);
   }
   `;
@@ -174,8 +174,11 @@ async function initialize() {
   trackball = new Trackball();
   camera = new Camera(new Vector3(0,3,35),new Vector3(0,0,3),new Vector3(0,1,0))
 
+  // files to fetch
+  let inputFile = await fetch("Hydra.obj").then(response => response.text());
 
-  let inputFile = await fetch("winged-victory-of-samothrace-at-the-louvre-paris-1.obj").then(response => response.text());
+  //let inputFile = await fetch("winged-victory-of-samothrace-at-the-louvre-paris-1.obj").then(response => response.text());
+  //let inputFile = await fetch("notreDame.obj").then(response => response.text());
   //let inputFile = await fetch("hungarian-parliament-1.obj").then(response => response.text());
   const {positions, normals, indices} = generateObj(inputFile);  
 
