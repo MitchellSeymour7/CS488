@@ -15,17 +15,18 @@ export class Camera {
         this.right = this.forward.cross(this.worldUp).normalize();
         this.up = this.right.cross(this.forward);
 
-        const rotation = new Matrix4();
-        rotation.elements.fill(0);
+        let rotation = new Matrix4();
         rotation.elements[0] = this.right.x;
         rotation.elements[1] = this.up.x;
         rotation.elements[2] = -this.forward.x;
+
         rotation.elements[4] = this.right.y;
         rotation.elements[5] = this.up.y;
-        rotation.elements[6] = -this.forward.y;
-        rotation.elements[8] = this.right.z;
-        rotation.elements[9] = this.up.z;
-        rotation.elements[10] = -this.forward.z;
+        rotation.elements[6] = -this.forward.y
+
+        rotation.elements[8] = this.right.z
+        rotation.elements[9] = this.up.z
+        rotation.elements[10] = -this.forward.z
         rotation.elements[15] = 1;
 
         this.matrix = rotation.multiplyMatrix4(Matrix4.translate(-this.from.x, -this.from.y, -this.from.z));
