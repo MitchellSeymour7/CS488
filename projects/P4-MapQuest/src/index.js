@@ -19,6 +19,7 @@ let landVertexArray;
 let flagShaderProgram;
 let flagVertexArray;
 let flagPos = [];
+let isFlagCollected = [];
 let clipFromEye;
 let trackball;
 let camera;
@@ -81,7 +82,6 @@ function render() {
     flagVertexArray.unbind();
     flagShaderProgram.unbind();
   }
-  //console.log(performance.now());
 
 }
 
@@ -271,6 +271,7 @@ function generateFlag() {
   flagShaderProgram = flag.flagShaderProgram;
   flagVertexArray = flag.flagVertexArray;
 }
+
 function generateFlags() {
   generateFlag();
   flagPos.push(Matrix4.translate(8.4,2.4,10).multiplyMatrix4(Matrix4.scale(.2,.2,.2)))
@@ -279,34 +280,47 @@ function generateFlags() {
   flagPos.push(Matrix4.translate(38.1,1.8,45).multiplyMatrix4(Matrix4.scale(.2,.2,.2)))
   flagPos.push(Matrix4.translate(37.1,2.1,20).multiplyMatrix4(Matrix4.scale(.2,.2,.2)))
   flagPos.push(Matrix4.translate(21.7,2.1,3.8).multiplyMatrix4(Matrix4.scale(.2,.2,.2)))
-
-
+  isFlagCollected.push(false,false,false,false,false,false);
 }
 
 function checkIfRemoveFlags() {
-  if (camera.from.x > 7 && camera.from.x < 9 &&
-      camera.from.z > 9 && camera.from.z < 11) {
-        flagPos[0] = Matrix4.translate(0,0,0);
+  var audio = new Audio("CollectFlag.wav");
+  if (camera.from.x > 7 && camera.from.x < 9 && camera.from.z > 9 && 
+      camera.from.z < 11 && !isFlagCollected[0]) {
+      isFlagCollected[0] = true
+      flagPos[0] = Matrix4.translate(0,0,0);
+      audio.play();
   }
-  if (camera.from.x > 1 && camera.from.x < 3 &&
-    camera.from.z > 21 && camera.from.z < 23) {
+  if (camera.from.x > 1 && camera.from.x < 3 && camera.from.z > 21 && 
+      camera.from.z < 23 && !isFlagCollected[1]) {
+      isFlagCollected[1] = true
       flagPos[1] = Matrix4.translate(0,0,0);
+      audio.play();
+
   }
-  if (camera.from.x > 16 && camera.from.x < 19 &&
-    camera.from.z > 30 && camera.from.z < 33) {
+  if (camera.from.x > 16 && camera.from.x < 19 && camera.from.z > 30 &&
+      camera.from.z < 33 && !isFlagCollected[2]) {
+      isFlagCollected[2] = true
       flagPos[2] = Matrix4.translate(0,0,0);
+      audio.play();
   }
-  if (camera.from.x > 37 && camera.from.x < 39 &&
-    camera.from.z > 44 && camera.from.z < 46) {
+  if (camera.from.x > 37 && camera.from.x < 39 && camera.from.z > 44 &&
+      camera.from.z < 46 && !isFlagCollected[3]) {
+      isFlagCollected[3] = true
       flagPos[3] = Matrix4.translate(0,0,0);
+      audio.play();
   }
-  if (camera.from.x > 36 && camera.from.x < 38 &&
-    camera.from.z > 19 && camera.from.z < 21) {
+  if (camera.from.x > 36 && camera.from.x < 38 && camera.from.z > 19 &&
+      camera.from.z < 21 && !isFlagCollected[4]) {
+      isFlagCollected[4] = true
       flagPos[4] = Matrix4.translate(0,0,0);
+      audio.play();
   }
-  if (camera.from.x > 20 && camera.from.x < 23 &&
-    camera.from.z > 3 && camera.from.z < 5) {
+  if (camera.from.x > 20 && camera.from.x < 23 && camera.from.z > 3 &&
+      camera.from.z < 5 && !isFlagCollected[5]) {
+      isFlagCollected[5] = true
       flagPos[5] = Matrix4.translate(0,0,0);
+      audio.play();
   }
 }
 
