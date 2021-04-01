@@ -91,11 +91,13 @@ export class Heightmap {
 
         out vec3 fnormal;
         out vec2 ftexcoords;
+        out vec3 fposition;
 
         void main() {
             gl_Position = clipFromEye * eyeFromModel * objPosition * vec4(position, 1.0);
             fnormal = (objPosition  * vec4(normal, 0)).xyz;
             ftexcoords = texcoords;
+            fposition = position;
         }
         `;
         
@@ -107,11 +109,21 @@ export class Heightmap {
 
         in vec3 fnormal;
         in vec2 ftexcoords;
-        
+        in vec3 fposition;
+
         out vec4 fragmentColor;
 
         void main() {
             vec3 lightColor = texture(image, ftexcoords).rgb;
+            if (fposition.y > 120.0) {
+                lightColor = lightColor+(vec3(1)*mod(fposition.y, 120.0)/120.0);
+                if (fposition.y > 240.0) {
+                    lightColor = lightColor+(vec3(1));
+                }
+            }
+            if (fposition.y < 80.0) {
+                lightColor = lightColor*mod(fposition.y, 80.0)/80.0+vec3(.5,.3,0)*(80.0-mod(fposition.y, 120.0))/120.0;
+            }
 
             vec3 normal = normalize(fnormal);
 
@@ -124,8 +136,6 @@ export class Heightmap {
 
             vec3 rgb = ambient + diffuse;
             fragmentColor = vec4(rgb, 1.0);
-
-            //fragmentColor = vec4(litness*albedo, 1.0);
         }
         `;
         let landShaderProgram = new ShaderProgram(vertexSource, fragmentSource);
