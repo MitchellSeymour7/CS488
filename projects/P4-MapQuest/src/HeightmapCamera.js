@@ -29,7 +29,7 @@ export class HeightmapCamera extends Camera {
     }
   
     advance(delta) {
-
+        console.log(this.from);
         let offset = this.forward.scalarMultiply(delta)
         this.from = this.from.add(offset);
         this.elevate()

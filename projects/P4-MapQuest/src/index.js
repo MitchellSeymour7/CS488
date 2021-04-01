@@ -6,6 +6,7 @@ import {Vector3} from './Vector3';
 import {Trackball} from './Trackball';
 import {HeightmapCamera} from './HeightmapCamera';
 import {Heightmap} from './Heightmap';
+import {Flag} from './Flag';
 const canvas = document.getElementById('canvas');
 window.gl = canvas.getContext('webgl2');
 
@@ -15,6 +16,9 @@ let skyBoxShaderProgram;
 let skyBoxVertexArray;
 let landShaderProgram;
 let landVertexArray;
+let flagShaderProgram;
+let flagVertexArray;
+let flagPos = [];
 let clipFromEye;
 let trackball;
 let camera;
@@ -31,7 +35,7 @@ function render() {
   gl.depthMask(false);
   skyBoxShaderProgram.bind();
   skyBoxShaderProgram.setUniformMatrix4('clipFromEye', clipFromEye);
-  const worldFromModel = Matrix4.translate(camera.from.x, camera.from.y, camera.from.z);
+  const worldFromModel = Matrix4.translate(camera.from.x, camera.from.y-0.02, camera.from.z);
   skyBoxShaderProgram.setUniformMatrix4('eyeFromModel', camera.matrix.multiplyMatrix4(worldFromModel));  
   skyBoxShaderProgram.setUniform1i('skybox', 2);
   skyBoxVertexArray.bind();
@@ -39,7 +43,7 @@ function render() {
   skyBoxVertexArray.unbind();
   skyBoxShaderProgram.unbind();
 
-  // draw rest of geometry
+  // draw water
   gl.depthMask(true);
   shaderProgram.bind();
   shaderProgram.setUniformMatrix4('clipFromEye', clipFromEye);
@@ -55,19 +59,30 @@ function render() {
   quadVertexArray.unbind();
   shaderProgram.unbind();
 
-   
   // draw land
-  gl.depthMask(true);
   landShaderProgram.bind();
   landShaderProgram.setUniformMatrix4('clipFromEye', clipFromEye);
   landShaderProgram.setUniformMatrix4('eyeFromModel', camera.matrix.multiplyMatrix4(trackball.rotation));
-  camera.setScale(0.2,0.01,.2);
   landShaderProgram.setUniformMatrix4('objPosition', Matrix4.scale(landScale.x,landScale.y,landScale.z));
   landShaderProgram.setUniform1i('image', 3);
   landVertexArray.bind();
   landVertexArray.drawIndexed(gl.TRIANGLES);
   landVertexArray.unbind();
   landShaderProgram.unbind();
+
+  // draw flag
+  for(let i = 0; i<flagPos.length; i++){
+    flagShaderProgram.bind();
+    flagShaderProgram.setUniformMatrix4('clipFromEye', clipFromEye);
+    flagShaderProgram.setUniformMatrix4('eyeFromModel', camera.matrix.multiplyMatrix4(trackball.rotation));  
+  flagShaderProgram.setUniformMatrix4('objPosition', flagPos[i].multiplyMatrix4(Matrix4.rotateY(performance.now()/30)));
+    flagVertexArray.bind();
+    flagVertexArray.drawIndexed(gl.TRIANGLES);
+    flagVertexArray.unbind();
+    flagShaderProgram.unbind();
+  }
+  //console.log(performance.now());
+
 }
 
 function onSizeChanged() {
@@ -251,6 +266,50 @@ function generateLand(heightmap) {
   landVertexArray = land.landVertexArray;
 }
 
+function generateFlag() {
+  let flag = Flag.makeFlag();
+  flagShaderProgram = flag.flagShaderProgram;
+  flagVertexArray = flag.flagVertexArray;
+}
+function generateFlags() {
+  generateFlag();
+  flagPos.push(Matrix4.translate(8.4,2.4,10).multiplyMatrix4(Matrix4.scale(.2,.2,.2)))
+  flagPos.push(Matrix4.translate(1.7,2.2,22.4).multiplyMatrix4(Matrix4.scale(.2,.2,.2)))
+  flagPos.push(Matrix4.translate(17.47,2.4,31.7).multiplyMatrix4(Matrix4.scale(.2,.2,.2)))
+  flagPos.push(Matrix4.translate(38.1,1.8,45).multiplyMatrix4(Matrix4.scale(.2,.2,.2)))
+  flagPos.push(Matrix4.translate(37.1,2.1,20).multiplyMatrix4(Matrix4.scale(.2,.2,.2)))
+  flagPos.push(Matrix4.translate(21.7,2.1,3.8).multiplyMatrix4(Matrix4.scale(.2,.2,.2)))
+
+
+}
+
+function checkIfRemoveFlags() {
+  if (camera.from.x > 7 && camera.from.x < 9 &&
+      camera.from.z > 9 && camera.from.z < 11) {
+        flagPos[0] = Matrix4.translate(0,0,0);
+  }
+  if (camera.from.x > 1 && camera.from.x < 3 &&
+    camera.from.z > 21 && camera.from.z < 23) {
+      flagPos[1] = Matrix4.translate(0,0,0);
+  }
+  if (camera.from.x > 16 && camera.from.x < 19 &&
+    camera.from.z > 30 && camera.from.z < 33) {
+      flagPos[2] = Matrix4.translate(0,0,0);
+  }
+  if (camera.from.x > 37 && camera.from.x < 39 &&
+    camera.from.z > 44 && camera.from.z < 46) {
+      flagPos[3] = Matrix4.translate(0,0,0);
+  }
+  if (camera.from.x > 36 && camera.from.x < 38 &&
+    camera.from.z > 19 && camera.from.z < 21) {
+      flagPos[4] = Matrix4.translate(0,0,0);
+  }
+  if (camera.from.x > 20 && camera.from.x < 23 &&
+    camera.from.z > 3 && camera.from.z < 5) {
+      flagPos[5] = Matrix4.translate(0,0,0);
+  }
+}
+
 async function initialize() {
   // SkyBox
   await loadSkyboxTexture('/skybox', 'jpg', gl.TEXTURE2);
@@ -266,14 +325,20 @@ async function initialize() {
   let heightmap = await loadHeightmap('Heightmap.png');
   generateLand(heightmap);
 
+  // flag
+  generateFlags();
+
   // Camera/Trackball
   trackball = new Trackball();
-  camera = new HeightmapCamera(new Vector3(heightmap.width/2*landScale.x,0.5,heightmap.height/2*landScale.z), new Vector3(0,0,0),
-                               new Vector3(0,1,0), heightmap, 1,landScale.x,landScale.y,landScale.z);
+  
+
+  camera = new HeightmapCamera(new Vector3(heightmap.width/2*landScale.x,0.5,heightmap.height/2*landScale.z), new Vector3(0,0,0), new Vector3(0,1,0), heightmap, 1,landScale.x,landScale.y,landScale.z);
+                               
 
   // Events
   window.addEventListener('resize', onSizeChanged);
   window.addEventListener('keydown', event => {
+    checkIfRemoveFlags();
     if (event.key === 'a') {
       camera.strafe(-0.1);
       render();
