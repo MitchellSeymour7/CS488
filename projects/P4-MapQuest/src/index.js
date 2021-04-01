@@ -7,6 +7,7 @@ import {Trackball} from './Trackball';
 import {HeightmapCamera} from './HeightmapCamera';
 import {Heightmap} from './Heightmap';
 import {Flag} from './Flag';
+import {Rock} from './Rock';
 const canvas = document.getElementById('canvas');
 window.gl = canvas.getContext('webgl2');
 
@@ -19,6 +20,9 @@ let landVertexArray;
 let flagShaderProgram;
 let flagVertexArray;
 let flagPos = [];
+let rockShaderProgram;
+let rockVertexArray;
+let rockPos = [];
 let isFlagCollected = [];
 let clipFromEye;
 let trackball;
@@ -76,11 +80,23 @@ function render() {
     flagShaderProgram.bind();
     flagShaderProgram.setUniformMatrix4('clipFromEye', clipFromEye);
     flagShaderProgram.setUniformMatrix4('eyeFromModel', camera.matrix.multiplyMatrix4(trackball.rotation));  
-  flagShaderProgram.setUniformMatrix4('objPosition', flagPos[i].multiplyMatrix4(Matrix4.rotateY(performance.now()/30)));
+    flagShaderProgram.setUniformMatrix4('objPosition', flagPos[i].multiplyMatrix4(Matrix4.rotateY(performance.now()/30)));
     flagVertexArray.bind();
     flagVertexArray.drawIndexed(gl.TRIANGLES);
     flagVertexArray.unbind();
     flagShaderProgram.unbind();
+  }
+
+  // draw rock
+  for(let i = 0; i<rockPos.length; i++){
+    rockShaderProgram.bind();
+    rockShaderProgram.setUniformMatrix4('clipFromEye', clipFromEye);
+    rockShaderProgram.setUniformMatrix4('eyeFromModel', camera.matrix.multiplyMatrix4(trackball.rotation));  
+    rockShaderProgram.setUniformMatrix4('objPosition', rockPos[i]);
+    rockVertexArray.bind();
+    rockVertexArray.drawIndexed(gl.TRIANGLES);
+    rockVertexArray.unbind();
+    rockShaderProgram.unbind();
   }
 
 }
@@ -266,14 +282,11 @@ function generateLand(heightmap) {
   landVertexArray = land.landVertexArray;
 }
 
-function generateFlag() {
+function generateFlags() {
   let flag = Flag.makeFlag();
   flagShaderProgram = flag.flagShaderProgram;
   flagVertexArray = flag.flagVertexArray;
-}
 
-function generateFlags() {
-  generateFlag();
   flagPos.push(Matrix4.translate(8.4,2.4,10).multiplyMatrix4(Matrix4.scale(.2,.2,.2)))
   flagPos.push(Matrix4.translate(1.7,2.2,22.4).multiplyMatrix4(Matrix4.scale(.2,.2,.2)))
   flagPos.push(Matrix4.translate(17.47,2.4,31.7).multiplyMatrix4(Matrix4.scale(.2,.2,.2)))
@@ -283,43 +296,60 @@ function generateFlags() {
   isFlagCollected.push(false,false,false,false,false,false);
 }
 
+function generateRocks() {
+  let rock = Rock.makeRock();
+  rockShaderProgram = rock.rockShaderProgram;
+  rockVertexArray = rock.rockVertexArray;
+  rockPos.push(Matrix4.translate(12.5,.7,11).multiplyMatrix4(Matrix4.scale(.2,.2,.2)))
+  rockPos.push(Matrix4.translate(17.5,1,26).multiplyMatrix4(Matrix4.scale(.4,.2,.4)))
+  rockPos.push(Matrix4.translate(34,1,45).multiplyMatrix4(Matrix4.scale(.4,.2,.4)))
+  rockPos.push(Matrix4.translate(26,.6,36).multiplyMatrix4(Matrix4.scale(.7,.3,.4)))
+  rockPos.push(Matrix4.translate(23,.6,48).multiplyMatrix4(Matrix4.scale(.7,.3,.4)))
+  rockPos.push(Matrix4.translate(38,.9,33).multiplyMatrix4(Matrix4.scale(.4,.5,.6)))
+  rockPos.push(Matrix4.translate(21,.9,36).multiplyMatrix4(Matrix4.scale(.4,.5,.6)))
+  rockPos.push(Matrix4.translate(28,1.5,22).multiplyMatrix4(Matrix4.scale(.5,.3,.2)))
+  rockPos.push(Matrix4.translate(25,1.9,8).multiplyMatrix4(Matrix4.scale(.5,.3,.2)))
+  rockPos.push(Matrix4.translate(16,2.1,3).multiplyMatrix4(Matrix4.scale(.5,.3,.2)))
+  rockPos.push(Matrix4.translate(6,.6,28).multiplyMatrix4(Matrix4.scale(.5,.3,.2)))
+}
+
 function checkIfRemoveFlags() {
   var audio = new Audio("CollectFlag.wav");
   if (camera.from.x > 7 && camera.from.x < 9 && camera.from.z > 9 && 
       camera.from.z < 11 && !isFlagCollected[0]) {
       isFlagCollected[0] = true
-      flagPos[0] = Matrix4.translate(0,0,0);
+      flagPos[0] = Matrix4.translate(0,-10,0);
       audio.play();
   }
   if (camera.from.x > 1 && camera.from.x < 3 && camera.from.z > 21 && 
       camera.from.z < 23 && !isFlagCollected[1]) {
       isFlagCollected[1] = true
-      flagPos[1] = Matrix4.translate(0,0,0);
+      flagPos[1] = Matrix4.translate(0,-10,0);
       audio.play();
 
   }
   if (camera.from.x > 16 && camera.from.x < 19 && camera.from.z > 30 &&
       camera.from.z < 33 && !isFlagCollected[2]) {
       isFlagCollected[2] = true
-      flagPos[2] = Matrix4.translate(0,0,0);
+      flagPos[2] = Matrix4.translate(0,-10,0);
       audio.play();
   }
   if (camera.from.x > 37 && camera.from.x < 39 && camera.from.z > 44 &&
       camera.from.z < 46 && !isFlagCollected[3]) {
       isFlagCollected[3] = true
-      flagPos[3] = Matrix4.translate(0,0,0);
+      flagPos[3] = Matrix4.translate(0,-10,0);
       audio.play();
   }
   if (camera.from.x > 36 && camera.from.x < 38 && camera.from.z > 19 &&
       camera.from.z < 21 && !isFlagCollected[4]) {
       isFlagCollected[4] = true
-      flagPos[4] = Matrix4.translate(0,0,0);
+      flagPos[4] = Matrix4.translate(0,-10,0);
       audio.play();
   }
   if (camera.from.x > 20 && camera.from.x < 23 && camera.from.z > 3 &&
       camera.from.z < 5 && !isFlagCollected[5]) {
       isFlagCollected[5] = true
-      flagPos[5] = Matrix4.translate(0,0,0);
+      flagPos[5] = Matrix4.translate(0,-10,0);
       audio.play();
   }
 }
@@ -339,15 +369,18 @@ async function initialize() {
   let heightmap = await loadHeightmap('Heightmap.png');
   generateLand(heightmap);
 
+  
+
+  
   // flag
   generateFlags();
+  generateRocks();
 
   // Camera/Trackball
   trackball = new Trackball();
   
-
-  camera = new HeightmapCamera(new Vector3(heightmap.width/2*landScale.x,0.5,heightmap.height/2*landScale.z), new Vector3(0,0,0), new Vector3(0,1,0), heightmap, 1,landScale.x,landScale.y,landScale.z);
-                               
+  camera = new HeightmapCamera(new Vector3(heightmap.width/2*landScale.x,0.5,heightmap.height/2*landScale.z), 
+                               new Vector3(0,0,0), new Vector3(0,1,0), heightmap, 1.15,landScale.x,landScale.y,landScale.z);                  
 
   // Events
   window.addEventListener('resize', onSizeChanged);
@@ -366,6 +399,7 @@ async function initialize() {
       camera.advance(-0.1);
       render();
     }
+    console.log(camera.from);
   });
 
   window.addEventListener('mousedown', () => {
