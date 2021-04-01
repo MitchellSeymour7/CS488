@@ -246,63 +246,9 @@ function generateWater() {
 
 function generateLand(heightmap) {
   let {positions, faces, normals, textCoords} = heightmap.toTriangleMesh();
-  const landAttributes = new VertexAttributes();
-  landAttributes.addAttribute('position', positions.length / 3, 3, positions);
-  landAttributes.addAttribute('normal', normals.length / 3, 3, normals);
-  landAttributes.addIndices(faces);
-  landAttributes.addAttribute('texcoords', textCoords.length / 2, 2, textCoords); 
-
-  const vertexSource = `
-  uniform mat4 clipFromEye;
-  uniform mat4 eyeFromModel;
-  uniform mat4 objPosition;
-
-  in vec3 position;
-  in vec3 normal;
-  in vec2 texcoords;
-
-  out vec3 fnormal;
-  out vec2 ftexcoords;
-
-  void main() {
-    gl_Position = clipFromEye * eyeFromModel * objPosition * vec4(position, 1.0);
-    fnormal = (objPosition  * vec4(normal, 0)).xyz;
-    ftexcoords = texcoords;
-  }
-  `;
-  
-  const fragmentSource = `
-  uniform sampler2D image;
-
-  const vec3 light_direction = normalize(vec3(1.0, 1.0, 1.0));
-  const float ambientWeight = 0.5;
-
-  in vec3 fnormal;
-  in vec2 ftexcoords;
-  
-  out vec4 fragmentColor;
-
-  void main() {
-    vec3 lightColor = texture(image, ftexcoords).rgb;
-
-    vec3 normal = normalize(fnormal);
-
-    //diffuse
-    float litness = max(0.0, dot(normal, light_direction));
-    vec3 diffuse = litness * lightColor * (1.0 - ambientWeight);
-
-    // Ambient
-    vec3 ambient = lightColor * ambientWeight;
-
-    vec3 rgb = ambient + diffuse;
-    fragmentColor = vec4(rgb, 1.0);
-
-    //fragmentColor = vec4(litness*albedo, 1.0);
-  }
-  `;
-
-  landShaderProgram = new ShaderProgram(vertexSource, fragmentSource);
-  landVertexArray = new VertexArray(landShaderProgram, landAttributes);
+  let land = heightmap.toSource(positions, faces, normals, textCoords);
+  landShaderProgram = land.landShaderProgram;
+  landVertexArray = land.landVertexArray;
 }
 
 async function initialize() {

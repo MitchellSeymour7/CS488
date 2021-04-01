@@ -1,4 +1,7 @@
 import {Vector3} from './Vector3';
+import {VertexAttributes} from './vertex_attributes';
+import {ShaderProgram} from './shader_program';
+import {VertexArray} from './vertex_array';
 
 export class Heightmap {
     constructor(grays, width, height) {
@@ -69,6 +72,67 @@ export class Heightmap {
 
         return {positions, faces, normals, textCoords};
     }
+
+    toSource(positions, faces, normals, textCoords) {
+        const landAttributes = new VertexAttributes();
+        landAttributes.addAttribute('position', positions.length / 3, 3, positions);
+        landAttributes.addAttribute('normal', normals.length / 3, 3, normals);
+        landAttributes.addIndices(faces);
+        landAttributes.addAttribute('texcoords', textCoords.length / 2, 2, textCoords); 
+
+        const vertexSource = `
+        uniform mat4 clipFromEye;
+        uniform mat4 eyeFromModel;
+        uniform mat4 objPosition;
+
+        in vec3 position;
+        in vec3 normal;
+        in vec2 texcoords;
+
+        out vec3 fnormal;
+        out vec2 ftexcoords;
+
+        void main() {
+            gl_Position = clipFromEye * eyeFromModel * objPosition * vec4(position, 1.0);
+            fnormal = (objPosition  * vec4(normal, 0)).xyz;
+            ftexcoords = texcoords;
+        }
+        `;
+        
+        const fragmentSource = `
+        uniform sampler2D image;
+
+        const vec3 light_direction = normalize(vec3(1.0, 1.0, 1.0));
+        const float ambientWeight = 0.5;
+
+        in vec3 fnormal;
+        in vec2 ftexcoords;
+        
+        out vec4 fragmentColor;
+
+        void main() {
+            vec3 lightColor = texture(image, ftexcoords).rgb;
+
+            vec3 normal = normalize(fnormal);
+
+            //diffuse
+            float litness = max(0.0, dot(normal, light_direction));
+            vec3 diffuse = litness * lightColor * (1.0 - ambientWeight);
+
+            // Ambient
+            vec3 ambient = lightColor * ambientWeight;
+
+            vec3 rgb = ambient + diffuse;
+            fragmentColor = vec4(rgb, 1.0);
+
+            //fragmentColor = vec4(litness*albedo, 1.0);
+        }
+        `;
+        let landShaderProgram = new ShaderProgram(vertexSource, fragmentSource);
+        let landVertexArray = new VertexArray(landShaderProgram, landAttributes);
+        return {landShaderProgram, landVertexArray};
+    }
+
     lerp(x, z, scaleX, scaleY, scaleZ) {
         let floorX = Math.floor(x/scaleX);
         let floorZ = Math.floor(z/scaleZ);
@@ -77,10 +141,6 @@ export class Heightmap {
         let nearHeight = (1 - fractionX) * this.get(floorX, floorZ) + fractionX * this.get(floorX + 1, floorZ);
         let farHeight = (1 - fractionX) * this.get(floorX, floorZ + 1) + fractionX * this.get(floorX + 1, floorZ + 1);
         let y = (1 - fractionZ) * nearHeight + fractionZ * farHeight;
-        console.log(floorX,floorZ);
-        console.log(fractionX,fractionZ);
-        console.log(nearHeight,farHeight);
-        console.log(y*.01);
         return y*scaleY;
     }
 
