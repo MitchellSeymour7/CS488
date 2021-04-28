@@ -11,16 +11,15 @@ init();
 animate();
 
 function init() {
-  camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-  camera.position.set( 100, 200, 300 );
-  camera.lookAt(0,0,0)
+  camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 2000 );
+  camera.position.set( 200, 200, 300 );
+  camera.lookAt( 100, 100, 0 )
 
   scene = new THREE.Scene();
-  scene.background = new THREE.Color( 0xf0f0f0 );
-
-  //
   scene.background = new THREE.Color( 0xa0a0a0 );
   scene.fog = new THREE.Fog( 0xa0a0a0, 200, 1000 );
+
+  //
 
   const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
   hemiLight.position.set( 0, 200, 0 );
@@ -29,13 +28,11 @@ function init() {
   const dirLight = new THREE.DirectionalLight( 0xffffff );
   dirLight.position.set( 0, 200, 100 );
   dirLight.castShadow = true;
-  dirLight.shadow.camera.top = 180;
-  dirLight.shadow.camera.bottom = - 100;
-  dirLight.shadow.camera.left = - 120;
-  dirLight.shadow.camera.right = 120;
+  dirLight.shadow.camera.top = 480;
+  dirLight.shadow.camera.bottom = - 240;
+  dirLight.shadow.camera.left = - 240;
+  dirLight.shadow.camera.right = 240;
   scene.add( dirLight );
-
-  //
 
   // ground
   const mesh = new THREE.Mesh( new THREE.PlaneGeometry( 2000, 2000 ), new THREE.MeshPhongMaterial( { color: 0x999999, depthWrite: false } ) );
@@ -51,12 +48,9 @@ function init() {
   // model
   const loader = new FBXLoader();
   loader.load( 'human-skeleton-animated.fbx', function ( object ) {
-
-    
+    object.translateX(100); 
     mixer = new THREE.AnimationMixer( object );
     animations = object.animations;
-    console.log(animations);
-    console.log(object);
     
     object.traverse( function ( child ) {
 
@@ -71,7 +65,7 @@ function init() {
 
     scene.add( object );
 
-    mixer.clipAction( animations[ 0 ] ).setDuration( 1 ).play().fadeIn(1).fadeOut();
+    mixer.clipAction( animations[ 0 ] ).setDuration( 1 ).play().fadeIn(1);
     mixer.clipAction( animations[ 1 ] ).setDuration( 1 ).play().fadeIn(1).fadeOut();
     mixer.clipAction( animations[ 2 ] ).setDuration( 1 ).play().fadeIn(1).fadeOut();
 
@@ -79,7 +73,7 @@ function init() {
 
   //
   renderer = new THREE.WebGLRenderer( { antialias: true } );
-
+  renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize( window.innerWidth, window.innerHeight );
   renderer.shadowMap.enabled = true;
 
@@ -127,10 +121,7 @@ function activateAnimation(animationNum, animationTime) {
 }
 
 async function activateAnimationToggle(animationNum, animationTime) {
-  animations.forEach(element => {
-    console.log(mixer.clipAction( element ).getEffectiveWeight(),mixer.clipAction( element ).isRunning());
-  });
-  console.log("\n");
+
   if(mixer.clipAction( animations[ animationNum ] ).getEffectiveWeight() === 0) {
     await mixer.clipAction( animations[ animationNum ] ).setDuration( animationTime ).fadeIn(1).play();
   }
@@ -141,11 +132,6 @@ async function activateAnimationToggle(animationNum, animationTime) {
 
 function animate() {
   requestAnimationFrame( animate );
-  render();
-}
-
-function render() {
-
   if ( mixer ) {
     const time = Date.now();
     mixer.update( ( time - prevTime ) * 0.001 );
